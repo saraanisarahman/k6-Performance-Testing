@@ -1,0 +1,37 @@
+name: k6 Smoke Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch: # adds a "Run workflow" button on GitHub
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Install k6
+        uses: grafana/setup-k6-action@v1
+
+      # Only the smoke test runs in CI, to avoid putting load on a shared public server.
+      - name: Run smoke test
+        env:
+          K6_WEB_DASHBOARD: 'true'
+          K6_WEB_DASHBOARD_EXPORT: reports/smoke-report.html
+        run: |
+          mkdir -p reports
+          k6 run tests/smoke.js
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: k6-reports
+          path: reports/
+          retention-days: 14
