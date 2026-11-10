@@ -1,0 +1,2 @@
+# Mark the generated k6 HTML reports so GitHub's language bar shows this as a JavaScript project
+reports/*.html linguist-generated
